@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>My Awesome Presentation</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <style type="text/css">
+      @import url(http://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(http://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(http://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body { font-family: 'Droid Serif'; }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+      }
+      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+
+class: center, middle
+# Generators & Co
+
+---
+
+class: center, middle
+# Generators
+
+---
+class: center, middle
+background-image: url(./generators.png)
+# Generator Object Model Diagram
+---
+# 5 minutes introduction:
+
+## Generator Function
+
+```js
+function *foo (x, y) {
+  console.log("1 Generator:", x, y)
+  console.log("2 Generator :", yield 1);
+  console.log("3 Generator:", yield 2);
+  return 3;
+}
+```
+---
+
+## Generator:
+
+```js
+var gen = foo(123, 456);
+```
+???
+Similar to a function.
+Can have its own context/this, can be called with call/apply
+arguments etc
+---
+
+## Iterator:
+
+```js
+console.log(gen.next()); // -> "1 Generator: 123, 456" & "{ done: false, value: 1 }
+console.log(gen.next("foo")); // -> "2 Generator: foo" & "{ done: false, value: 2 }
+console.log(gen.next("bar")); // -> "2 Generator: bar" & "{ done: true, value: 3 }
+
+```
+---
+Execution order:
+
+```js
+function *foo (x, y) {
+  console.log("1 Generator:", x, y)
+  var y1 = yield 1;
+  console.log("2 Generator :", y1);
+  var y2 = yield 2;
+  console.log("3 Generator:", y2);
+  return 3;
+}
+
+*var gen = foo(123, 456);
+
+console.log(gen.next());
+console.log(gen.next("foo"));
+console.log(gen.next("bar"));
+```
+---
+Execution order:
+
+```js
+function *foo (x, y) {
+  console.log("1 Generator:", x, y)
+  var y1 = yield 1;
+  console.log("2 Generator :", y1);
+  var y2 = yield 2;
+  console.log("3 Generator:", y2);
+  return 3;
+}
+
+var gen = foo(123, 456); // newborn
+
+*console.log(gen.next());
+console.log(gen.next("foo"));
+console.log(gen.next("bar"));
+```
+---
+Execution order:
+
+```js
+function *foo (x, y) {
+* console.log("1 Generator:", x, y)
+  var y1 = yield 1;
+  console.log("2 Generator :", y1);
+  var y2 = yield 2;
+  console.log("3 Generator:", y2);
+  return 3;
+}
+
+var gen = foo(123, 456); // executing
+
+console.log(gen.next());
+console.log(gen.next("foo"));
+console.log(gen.next("bar"));
+```
+---
+Execution order:
+```js
+function *foo (x, y) {
+  console.log("1 Generator:", x, y)
+* var y1 = yield 1;
+  console.log("2 Generator :", y1);
+  var y2 = yield 2;
+  console.log("3 Generator:", y2);
+  return 3;
+}
+
+var gen = foo(123, 456); // executing
+
+console.log(gen.next());
+console.log(gen.next("foo"));
+console.log(gen.next("bar"));
+```
+---
+Execution order:
+
+```js
+function *foo (x, y) {
+  console.log("1 Generator:", x, y)
+  var y1 = yield 1;
+  console.log("2 Generator :", y1);
+  var y2 = yield 2;
+  console.log("3 Generator:", y2);
+  return 3;
+}
+
+var gen = foo(123, 456); // suspended
+
+*console.log(gen.next());
+console.log(gen.next("foo"));
+console.log(gen.next("bar"));
+```
+---
+Execution order:
+
+```js
+function *foo (x, y) {
+  console.log("1 Generator:", x, y)
+  var y1 = yield 1;
+  console.log("2 Generator :", y1);
+  var y2 = yield 2;
+  console.log("3 Generator:", y2);
+  return 3;
+}
+
+var gen = foo(123, 456); // suspended
+
+console.log(gen.next());
+*console.log(gen.next("foo"));
+console.log(gen.next("bar"));
+```
+---
+Execution order:
+
+```js
+function *foo (x, y) {
+  console.log("1 Generator:", x, y)
+  var y1 = yield 1;
+* console.log("2 Generator :", y1);
+  var y2 = yield 2;
+  console.log("3 Generator:", y2);
+  return 3;
+}
+
+var gen = foo(123, 456); // executing
+
+console.log(gen.next());
+console.log(gen.next("foo"));
+console.log(gen.next("bar"));
+```
+---
+Execution order:
+
+```js
+function *foo (x, y) {
+  console.log("1 Generator:", x, y)
+  var y1 = yield 1;
+  console.log("2 Generator :", y1);
+* var y2 = yield 2;
+  console.log("3 Generator:", y2);
+  return 3;
+}
+
+var gen = foo(123, 456); // executing
+
+console.log(gen.next());
+console.log(gen.next("foo"));
+console.log(gen.next("bar"));
+```
+---
+Execution order:
+
+```js
+function *foo (x, y) {
+  console.log("1 Generator:", x, y)
+  var y1 = yield 1;
+  console.log("2 Generator :", y1);
+  var y2 = yield 2;
+  console.log("3 Generator:", y2);
+  return 3;
+}
+
+var gen = foo(123, 456); // suspended
+
+console.log(gen.next());
+*console.log(gen.next("foo"));
+console.log(gen.next("bar"));
+```
+---
+Execution order:
+
+```js
+function *foo (x, y) {
+  console.log("1 Generator:", x, y)
+  var y1 = yield 1;
+  console.log("2 Generator :", y1);
+  var y2 = yield 2;
+  console.log("3 Generator:", y2);
+  return 3;
+}
+
+var gen = foo(123, 456); // suspended
+
+console.log(gen.next());
+console.log(gen.next("foo"));
+*console.log(gen.next("bar"));
+```
+---
+Execution order:
+
+```js
+function *foo (x, y) {
+  console.log("1 Generator:", x, y)
+  var y1 = yield 1;
+  console.log("2 Generator :", y1);
+  var y2 = yield 2;
+* console.log("3 Generator:", y2);
+  return 3;
+}
+
+var gen = foo(123, 456); // executing
+
+console.log(gen.next());
+console.log(gen.next("foo"));
+console.log(gen.next("bar"));
+```
+---
+Execution order:
+
+```js
+function *foo (x, y) {
+  console.log("1 Generator:", x, y)
+  var y1 = yield 1;
+  console.log("2 Generator :", y1);
+  var y2 = yield 2;
+  console.log("3 Generator:", y2);
+* return 3;
+}
+
+var gen = foo(123, 456); // executing
+
+console.log(gen.next());
+console.log(gen.next("foo"));
+console.log(gen.next("bar"));
+```
+---
+Execution order:
+
+```js
+function *foo (x, y) {
+  console.log("1 Generator:", x, y)
+  var y1 = yield 1;
+  console.log("2 Generator :", y1);
+  var y2 = yield 2;
+  console.log("3 Generator:", y2);
+  return 3;
+}
+
+var gen = foo(123, 456); // closed
+
+console.log(gen.next());
+console.log(gen.next("foo"));
+*console.log(gen.next("bar"));
+```
+---
+- 4 states: “newborn”, “executing”, “suspended”, or “closed”
+- throws exeption if parameter passed to a newborn generator
+- throws exeption if next() called on closed generator
+
+---
+class: center, middle
+# Generators & exceptions
+---
+```js
+function *foo (x, y) {
+  console.log("1 Generator:", x, y)
+  var y1 = yield 1;
+  console.log("2 Generator :", y1);
+* try {
+    var y2 = yield 2;
+    console.log("3 Generator/Try:", y2);
+* } catch (e) {
+    console.log("3 Generator/Catch:", e);
+  }
+  return 3;
+}
+
+var gen = foo(123, 456);
+
+console.log(gen.next());
+console.log(gen.next("foo"));
+console.log(gen.next("bar"));
+```
+---
+```js
+function *foo (x, y) {
+  console.log("1 Generator:", x, y)
+  var y1 = yield 1;
+  console.log("2 Generator :", y1);
+  try {
+    var y2 = yield 2;
+    console.log("3 Generator/Try:", y2);
+  } catch (e) {
+    console.log("3 Generator/Catch:", e);
+  }
+  return 3;
+}
+
+var gen = foo(123, 456);
+
+console.log(gen.next());
+console.log(gen.next("foo"));
+*console.log(gen.throw("bar"));
+```
+---
+```js
+function *foo (x, y) {
+  console.log("1 Generator:", x, y)
+  var y1 = yield 1;
+  console.log("2 Generator :", y1);
+  try {
+    var y2 = yield 2;
+    console.log("3 Generator/Try:", y2);
+  } catch (e) {
+    console.log("3 Generator/Catch:", e);
+  }
+  return 3;
+}
+
+var gen = foo(123, 456);
+
+console.log(gen.next());
+console.log(gen.next("foo"));
+*console.log(gen.throw("bar"));
+```
+Output:
+```
+1 Generator: 123 456
+{ value: 1, done: false }
+2 Generator : foo
+{ value: 2, done: false }
+3 Generator/Catch: bar
+{ value: 3, done: true }
+```
+---
+```js
+function *foo (x, y) {
+  console.log("1 Generator:", x, y)
+  var y1 = yield 1;
+  console.log("2 Generator :", y1);
+* try {
+    var y2 = yield 2;
+    console.log("3 Generator/Try:", y2);
+* } catch (e) {
+    console.log("3 Generator/Catch:", e);
+  }
+  return 3;
+}
+
+var gen = foo(123, 456);
+
+console.log(gen.next());
+console.log(gen.next("foo"));
+console.log(gen.next("bar"));
+```
+Output:
+```
+1 Generator: 123 456
+{ value: 1, done: false }
+2 Generator : foo
+{ value: 2, done: false }
+3 Generator/Try: bar
+{ value: 3, done: true }
+```
+---
+```js
+gen.next();
+// VS
+gen.send();
+```
+
+next is the same as send, but without parameters.
+
+Most implementations have them identical (next sends arguments, not "undefined")
+
+---
+
+class: center middle
+recursive `yield *` and `gen.close()`
+---
+```js
+gen.close()
+```
+Terminates a suspended generator. Similar to generating exception inside generator (not sending to it via gen.throw()!)
+
+Resumes generator to finish active "finally" blocks and chamges state to "closed"
+
+---
+
+```js
+yield * expression
+```
+TL;DR - if expression is generator, yield it recursively
+
+Longer version:
+```js
+let (g = <<expr>>) {
+    let received = void 0, send = true, result = void 0;
+    try {
+        while (true) {
+            let next = send ? g.send(received) : g.throw(received);
+            try {
+                received = yield next;
+                send = true;
+            } catch (e) {
+                received = e;
+                send = false;
+            }
+        }
+    } catch (e) {
+        if (!isStopIteration(e))
+            throw e;
+        result = e.value;
+    } finally {
+        try { g.close(); } catch (ignored) { }
+    }
+    result
+}
+```
+---
+background-image: url(./generators.png)
+---
+class: center middle
+# Async control flow
+---
+background-image: url(./eventloop2.gif)
+---
+# Async control flow
+## Event loop
+---
+# Async control flow
+## Event loop
+## "Inversed" control
+---
+# Async control flow
+## Event loop
+## "Inversed" control
+### You start by enqueuing requests, each associated with some event (IO/timer, etc)
+---
+# Async control flow
+## Event loop
+## "Inversed" control
+### You start by enqueuing requests, each associated with some event (IO/timer, etc) and **exit** (resume control to event loop)
+### Your request handlers are called from event loop based on associated events
+---
+# Async control flow
+## Event loop
+## "Inversed" control
+### You start by enqueuing requests, each associated with some event (IO/timer, etc) and **exit** (resume control to event loop)
+### Your request handlers are called from event loop based on associated events
+### You possible add new requests inside your handlers (so it goes on and on)
+---
+## Event loop
+## "Inversed" control
+### You start by enqueuing requests, each associated with some event (IO/timer, etc) and **exit** (resume control to event loop)
+### Your request handlers are called from event loop based on associated events
+### You possible add new requests inside your handlers (so it goes on and on)
+### Your code always block event loop. No events processed when your code is running
+---
+### You start by enqueuing requests, each associated with some event (IO/timer, etc) and **exit** (resume control to event loop)
+### Your request handlers are called from event loop based on associated events
+### You possible add new requests inside your handlers (so it goes on and on)
+### Your code always block event loop. No events processed when your code is running
+### Event loop spends most if it's live in suspended state: if there is no events, no code is executed
+
+---
+class: center middle
+# This is very similar to generators.
+---
+
+class: center middle
+# Let's make "Inversion of inversion of control".
+
+---
+
+## Assumption: we always yield a function which return a function takes single argument - completion callback (aka "thunk")
+
+```js
+function run(genFn) {
+  var gen = genFn();
+  (function next() {
+    var it = gen.next();
+    if (it.done)
+      return;
+    it.value(next);
+  })();
+}
+```
+---
+```js
+function sleep(ms) {
+  return function(cb) {
+    setTimeout(cb, ms);
+  };
+}
+
+run(function *() {
+  console.log(1);
+  yield sleep(1000);
+  console.log(2);
+  yield sleep(1100);
+  console.log(3);
+});
+```
+---
+```js
+function sleep(ms) {
+  return function(cb) {
+    setTimeout(cb, ms);
+  };
+}
+
+*run(function *() {
+  console.log(1);
+  yield sleep(1000);
+  console.log(2);
+  yield sleep(1100);
+  console.log(3);
+});
+
+eventLoop() {
+  // sleep until OS interrupt
+}
+```
+---
+```js
+function sleep(ms) {
+  return function(cb) {
+    setTimeout(cb, ms);
+  };
+}
+
+run(function *() {
+* console.log(1);
+  yield sleep(1000);
+  console.log(2);
+  yield sleep(1100);
+  console.log(3);
+});
+
+eventLoop() {
+  // sleep until OS interrupt
+}
+```
+---
+```js
+function sleep(ms) {
+  return function(cb) {
+    setTimeout(cb, ms);
+  };
+}
+
+run(function *() {
+  console.log(1);
+* yield sleep(1000);
+  console.log(2);
+  yield sleep(1100);
+  console.log(3);
+});
+
+eventLoop() {
+  // sleep until OS interrupt
+}
+```
+---
+```js
+function sleep(ms) {
+  return function(cb) {
+*   setTimeout(cb, ms);
+  };
+}
+
+run(function *() {
+  console.log(1);
+  yield sleep(1000);
+  console.log(2);
+  yield sleep(1100);
+  console.log(3);
+});
+
+eventLoop() {
+  // sleep until OS interrupt
+}
+```
+---
+```js
+function sleep(ms) {
+  return function(cb) {
+    setTimeout(cb, ms);
+  };
+}
+
+run(function *() {
+  console.log(1);
+  yield sleep(1000);
+  console.log(2);
+  yield sleep(1100);
+  console.log(3);
+});
+
+eventLoop() {
+* // sleep until OS interrupt
+}
+```
+---
+```js
+function sleep(ms) {
+  return function(cb) {
+    setTimeout(cb, ms);
+  };
+}
+
+*run(function *() {
+  console.log(1);
+  yield sleep(1000);
+  console.log(2);
+  yield sleep(1100);
+  console.log(3);
+});
+
+eventLoop() {
+  // call cb()
+}
+```
+---
+```js
+function sleep(ms) {
+  return function(cb) {
+    setTimeout(cb, ms);
+  };
+}
+
+run(function *() {
+  console.log(1);
+  yield sleep(1000);
+  console.log(2);
+* yield sleep(1100);
+  console.log(3);
+});
+
+eventLoop() {
+  // call cb()
+}
+```
+
+---
+class: center
+## Meet Co: https://github.com/visionmedia/co
+---
+## What's included?
+---
+## What's included?
+### You can yield thunk, Promice, array or another generator
+---
+## What's included?
+### You can yield thunk, Promice, array or another generator
+### Error handling! try/catch your async code
+---
+### Error handling:
+### **Both** Cps-style errors - `callback(new Error('foo'))` and traditional exceptions automatically yield trow
+---
+## No more
+```js
+function doAsyncCall(callback) {
+   //
+   try {
+     asyncFunc(function(err, data) {
+       if (err)
+         return callback(err);
+       // use data
+     });
+   } catch(e) {
+     callback(e);
+   }
+}
+```
+---
+## No more
+```js
+function doAsyncCall(callback) {
+   //
+   try {
+     asyncFunc(function(err, data) {
+       if (err)
+         return callback(err);
+       // use data
+     });
+   } catch(e) {
+     callback(e);
+   }
+}
+```
+## This is just **one** async call done more or less right with checks for exceptions in the main code and in hadler as well with CPS error check
+---
+## Instead
+```js
+co(function *() {
+  try {
+    // sync code
+    // more sync code()
+    var asyncResult1 = yield asyncCall1();
+    var asyncResult2 = yield asyncCall2();
+    var asyncResult2 = yield asyncCall2(asyncResult1, asyncResult2);
+    // more sync code()
+  } catch (e) {
+    // one logical error handler. No need to check every call result
+  } finally () {
+    // cleanup
+  }
+})();
+```
+---
+## Parallel execution: just return array of resumeable objects
+```js
+co(function*() {
+  // sequential:
+  yield db.query('select sleep(1)');
+  yield db.query('select sleep(2)');
+
+  // 3 seconds to get there
+
+  // parallel:
+  yield [db.query('select sleep(1)'), db.query('select sleep(2)')]
+
+  // 2 seconds
+})();
+```
+---
+## Converting existing code
+### Use thunkify to convert cps style to thunks -
+```js
+var co = require('co');
+var thunkify = require('thunkify');
+var request = require('request');
+var get = thunkify(request.get);
+
+co(function *(){
+  var a = yield get('http://google.com');
+  var b = yield get('http://yahoo.com');
+  console.log(a.statusCode, b.statusCode);
+});
+```
+---
+## Lots of pre-wrapped modules (usually called co-something or something-co):
+## https://github.com/visionmedia/co/wiki
+
+---
+background-image: url(./co-wrap1.png)
+---
+background-image: url(./co-wrap2.png)
+---
+class: center, middle
+# Using with non-generators-capable JS engine
+---
+class: center, middle
+# Using with non-generators-capable JS engine
+## Facebook _regenerator_
+
+https://github.com/facebook/regenerator
+
+```
+regenerator es6.js > es5.js # Just the transform.
+regenerator --include-runtime es6.js > es5.js # Add the runtime too.
+```
+---
+class: center, middle
+# Using with non-generators-capable JS engine
+## Facebook _regenerator_
+
+https://github.com/facebook/regenerator
+
+```
+regenerator es6.js > es5.js # Just the transform.
+regenerator --include-runtime es6.js > es5.js # Add the runtime too.
+
+For browsers and node.js!
+```
+---
+# node.js helper: gnode
+## https://github.com/TooTallNate/gnode
+
+---
+# node.js helper: gnode
+## https://github.com/TooTallNate/gnode
+
+### Just include `require('gnode')` in the module _that does not use_ generators, and all child modules are transpiled on the fly if need so.
+---
+# node.js helper: gnode
+## https://github.com/TooTallNate/gnode
+
+### Just include `require('gnode')` in the module _that does not use_ generators, and all child modules are transpiled on the fly if need so.
+### Or, instead, run your node.js program with `gnode server.js` instead `node server.js`
+
+---
+# Q&A?
+
+## Me:  Andrey Sidorov @sidorares ( twitter/github ), @melbnodejs
+
+    </textarea>
+    <script src="./remark.js" type="text/javascript">
+    </script>
+    <script type="text/javascript">
+      var slideshow = remark.create();
+      remark.addPhoneControl(slideshow);
+    </script>
+  </body>
+</html>
